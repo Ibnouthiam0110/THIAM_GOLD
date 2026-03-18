@@ -130,6 +130,14 @@
     font-weight: 700;
     background: linear-gradient(135deg, #fff8e8, #fdf4e2);
   }
+  .brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  background: white;
+  }
   .brand-name {
     font-family: var(--font-serif);
     font-size: 1.15rem;
@@ -1250,14 +1258,14 @@ const categories = [
 ];
 
 const products = [
-  { id:1, cat:"bague",    name:"Bague classique en or",   desc:"Modèle élégant pour usage quotidien ou cérémonie.",        price:"À partir de 95 000 FCFA",    note:"Selon poids",    badge:"Bague",    img:"images/4.jpeg",  fb:"https://images.unsplash.com/photo-1629224316810-9d8805b95e76?w=600&q=80" },
-  { id:2, cat:"collier",  name:"Collier chaîne fine",     desc:"Chaîne en or brillante, finition moderne et légère.",       price:"120 000 – 350 000 FCFA",    note:"Selon longueur", badge:"Collier",   img:"images/5.jpeg",  fb:"https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80" },
-  { id:3, cat:"bracelet", name:"Bracelet en or",          desc:"Bracelet chic pour femme ou homme, finition soignée.",      price:"À partir de 80 000 FCFA",    note:"Prix variable",  badge:"Bracelet", img:"images/6.jpeg",  fb:"https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?w=600&q=80" },
-  { id:4, cat:"boucles",  name:"Boucles d'oreilles",      desc:"Design raffiné, finitions impeccables pour toute occasion.", price:"60 000 – 180 000 FCFA",     note:"Selon modèle",   badge:"Boucles",  img:"images/7.jpeg",  fb:"https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?w=600&q=80" },
-  { id:5, cat:"bague",    name:"Bague premium",           desc:"Modèle travaillé avec finition haut de gamme.",              price:"150 000 – 450 000 FCFA",    note:"Poids & design", badge:"Bague",    img:"images/8.jpeg",  fb:"https://images.unsplash.com/photo-1615655096345-61a54750068d?w=600&q=80" },
-  { id:6, cat:"collier",  name:"Collier pendentif",       desc:"Collier élégant pour un style distingué et unique.",        price:"À partir de 140 000 FCFA",   note:"Selon pendentif",badge:"Collier",  img:"images/9.jpeg",  fb:"https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=600&q=80" },
-  { id:7, cat:"bracelet", name:"Bracelet gourmette",      desc:"Style intemporel, mailles brillantes et solides.",           price:"110 000 – 320 000 FCFA",    note:"Selon grammage", badge:"Bracelet", img:"images/10.jpeg", fb:"https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=600&q=80" },
-  { id:8, cat:"boucles",  name:"Boucles tendance",        desc:"Modèle moderne pour toutes les occasions festives.",         price:"À partir de 75 000 FCFA",   note:"Selon finition", badge:"Boucles",  img:"images/11.jpeg", fb:"https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&q=80" },
+  { id:1, cat:"bague",    name:"Bague classique en or",   desc:"Modèle élégant pour usage quotidien ou cérémonie.",        price:"",    note:"Selon poids",    badge:"Bague",    img:"images/4.jpeg",  fb:"https://images.unsplash.com/photo-1629224316810-9d8805b95e76?w=600&q=80" },
+  { id:2, cat:"collier",  name:"Collier chaîne fine",     desc:"Chaîne en or brillante, finition moderne et légère.",       price:"",    note:"Selon longueur", badge:"Collier",   img:"images/5.jpeg",  fb:"https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80" },
+  { id:3, cat:"bracelet", name:"Bracelet en or",          desc:"Bracelet chic pour femme ou homme, finition soignée.",      price:"",    note:"Prix variable",  badge:"Bracelet", img:"images/6.jpeg",  fb:"https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?w=600&q=80" },
+  { id:4, cat:"boucles",  name:"Boucles d'oreilles",      desc:"Design raffiné, finitions impeccables pour toute occasion.", price:"",     note:"Selon modèle",   badge:"Boucles",  img:"images/7.jpeg",  fb:"https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?w=600&q=80" },
+  { id:5, cat:"bague",    name:"Bague premium",           desc:"Modèle travaillé avec finition haut de gamme.",              price:"",    note:"Poids & design", badge:"Bague",    img:"images/8.jpeg",  fb:"https://images.unsplash.com/photo-1615655096345-61a54750068d?w=600&q=80" },
+  { id:6, cat:"collier",  name:"Collier pendentif",       desc:"Collier élégant pour un style distingué et unique.",        price:"",   note:"Selon pendentif",badge:"Collier",  img:"images/9.jpeg",  fb:"https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=600&q=80" },
+  { id:7, cat:"bracelet", name:"Bracelet gourmette",      desc:"Style intemporel, mailles brillantes et solides.",           price:"",    note:"Selon grammage", badge:"Bracelet", img:"images/10.jpeg", fb:"https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=600&q=80" },
+  { id:8, cat:"boucles",  name:"Boucles tendance",        desc:"Modèle moderne pour toutes les occasions festives.",         price:"",   note:"Selon finition", badge:"Boucles",  img:"images/11.jpeg", fb:"https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&q=80" },
 ];
 
 const WA_NUMBER = "221786064030";
@@ -1541,11 +1549,14 @@ function App() {
       <header className="header">
         <div className="header-inner">
           <a href="#accueil" className="brand">
-            <div className="brand-icon">TG</div>
-            <div>
-              <div className="brand-name">Bijouterie Thiam Gold</div>
-              <div className="brand-sub">Bijoux en Or · Dakar / Sénégal</div>
-            </div>
+         <div className="brand">
+  <img src="images/Logo.jpeg" alt="Thiam Gold Logo" className="brand-logo" />
+  
+  <div>
+    <div className="brand-name">Thiam Gold</div>
+    <div className="brand-sub">Bijouterie</div>
+  </div>
+</div>
           </a>
 
           <ul className="nav-links">
@@ -1646,7 +1657,6 @@ function App() {
 
         <div className="products-section">
           <div className="toolbar">
-            <span className="price-badge">💡 Prix affichés à titre indicatif</span>
             <span style={{fontSize:'.82rem', color:'var(--muted)'}}>
               {filtered.length} bijou{filtered.length > 1 ? 'x' : ''} affiché{filtered.length > 1 ? 's' : ''}
             </span>
