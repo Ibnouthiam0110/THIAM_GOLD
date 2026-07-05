@@ -74,6 +74,64 @@
   .delay-3 { animation-delay: .3s; }
   .delay-4 { animation-delay: .45s; }
 
+  @keyframes floatSlow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(8deg); }
+  }
+  @keyframes cartBump {
+    0% { transform: scale(.5); }
+    60% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  @keyframes softGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(184,149,42,0); }
+    50% { box-shadow: 0 0 0 6px rgba(184,149,42,.12); }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .8s cubic-bezier(.16,.8,.24,1), transform .8s cubic-bezier(.16,.8,.24,1);
+    will-change: opacity, transform;
+  }
+  .reveal.in-view { opacity: 1; transform: none; }
+
+  /* SCROLL PROGRESS */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-light), var(--gold));
+    z-index: 1100;
+    transition: width .1s linear;
+  }
+
+  /* FLOATING WHATSAPP */
+  .wa-float {
+    position: fixed;
+    bottom: 24px; left: 24px;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: #25d366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(37,211,102,.35);
+    z-index: 1500;
+    opacity: 0;
+    transform: translateY(16px) scale(.8);
+    transition: opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .wa-float.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    animation: pulse 2.8s ease infinite;
+  }
+  .wa-float:hover { transform: translateY(-2px) scale(1.05); }
+
   /* ORNAMENT DIVIDER */
   .ornament {
     display: flex;
@@ -101,6 +159,11 @@
     background: rgba(250,246,239,.95);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--line);
+    transition: box-shadow .3s ease, background .3s ease;
+  }
+  .header.scrolled {
+    background: rgba(250,246,239,.98);
+    box-shadow: 0 8px 30px rgba(26,22,16,.06);
   }
   .header-inner {
     max-width: 1280px;
@@ -191,7 +254,20 @@
     background: linear-gradient(135deg, var(--gold-light), var(--gold));
     color: var(--dark);
     box-shadow: 0 4px 16px rgba(184,149,42,.25);
+    position: relative;
+    overflow: hidden;
   }
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent);
+    transform: skewX(-20deg);
+    transition: left .6s ease;
+    pointer-events: none;
+  }
+  .btn-gold:hover::after { left: 130%; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,149,42,.3); }
   .btn-outline {
     background: transparent;
@@ -292,6 +368,7 @@
     color: rgba(184,149,42,.06);
     pointer-events: none;
     line-height: 1;
+    animation: floatSlow 7s ease-in-out infinite;
   }
   .hero-kicker {
     display: inline-flex;
@@ -308,6 +385,7 @@
     text-transform: uppercase;
     margin-bottom: 1.25rem;
     width: fit-content;
+    animation: softGlow 3.5s ease-in-out infinite;
   }
   .hero-title {
     font-family: var(--font-serif);
@@ -570,7 +648,9 @@
     background-position: center;
     position: relative;
     background-color: #f3ead8;
+    transition: transform .6s cubic-bezier(.16,.8,.24,1);
   }
+  .product-card:hover .product-thumb { transform: scale(1.06); }
   .product-badge {
     position: absolute;
     top: 10px; left: 10px;
@@ -932,7 +1012,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: fadeUp .2s ease;
+    animation: cartBump .35s cubic-bezier(.34,1.56,.64,1);
   }
 
   /* ADD TO CART BUTTON ON PRODUCT */
@@ -1272,6 +1352,48 @@ const WA_NUMBER = "221786064030";
 const waLink = (msg = "Bonjour Bijouterie Thiam Gold, je souhaite avoir des informations sur vos bijoux.") =>
   `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
 
+// SCROLL REVEAL
+function useReveal(threshold = 0.15) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.unobserve(el); }
+    }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+function Reveal({ children, className = '', delay = 0, as = 'div', style = {}, ...rest }) {
+  const [ref, visible] = useReveal();
+  const Tag = as;
+  return (
+    <Tag ref={ref} className={`reveal${visible ? ' in-view' : ''} ${className}`} style={{ transitionDelay: `${delay}ms`, ...style }} {...rest}>
+      {children}
+    </Tag>
+  );
+}
+
+// SCROLL PROGRESS BAR
+function ScrollProgress() {
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const height = h.scrollHeight - h.clientHeight;
+      setW(height > 0 ? (h.scrollTop / height) * 100 : 0);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return <div className="scroll-progress" style={{ width: `${w}%` }} />;
+}
+
 // CART CONTEXT
 const CartContext = React.createContext();
 function CartProvider({ children }) {
@@ -1441,11 +1563,28 @@ function HeroSlider() {
   );
 }
 
+// FLOATING WHATSAPP BUTTON
+function FloatingWhatsApp() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 400);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return (
+    <a href={waLink()} target="_blank" rel="noopener" className={`wa-float${show ? ' show' : ''}`} aria-label="Contacter sur WhatsApp">
+      <WaIcon size={26} />
+    </a>
+  );
+}
+
 // PRODUCT CARD
-function ProductCard({ item }) {
+function ProductCard({ item, index = 0 }) {
   const { addItem } = React.useContext(CartContext);
   const [bg, setBg] = useState(item.img);
   const [added, setAdded] = useState(false);
+  const [ref, visible] = useReveal(0.1);
 
   useEffect(() => {
     const img = new Image();
@@ -1462,7 +1601,7 @@ function ProductCard({ item }) {
   const msg = `Bonjour Bijouterie Thiam Gold, je suis intéressé(e) par : ${item.name}. Pourriez-vous me donner plus d'informations et le prix exact ?`;
 
   return (
-    <article className="product-card animate-up">
+    <article ref={ref} className={`product-card reveal${visible ? ' in-view' : ''}`} style={{ transitionDelay: `${(index % 4) * 90}ms` }}>
       <div className="product-thumb" style={{ backgroundImage:`url('${bg}')` }}>
         <span className="product-badge">{item.badge}</span>
         <a href={waLink(msg)} target="_blank" rel="noopener" className="product-wa-btn" aria-label="Commander sur WhatsApp">
@@ -1524,10 +1663,12 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("accueil");
   const [cartOpen, setCartOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { total } = React.useContext(CartContext);
 
   useEffect(() => {
     const handleScroll = () => {
+      setScrolled(window.scrollY > 12);
       const sections = ['accueil','services','contact'];
       for (const id of sections.reverse()) {
         const el = document.getElementById(id);
@@ -1545,8 +1686,10 @@ function App() {
 
   return (
     <>
+      <ScrollProgress/>
+
       {/* HEADER */}
-      <header className="header">
+      <header className={`header${scrolled ? ' scrolled' : ''}`}>
         <div className="header-inner">
           <a href="#accueil" className="brand">
          <div className="brand">
@@ -1569,7 +1712,7 @@ function App() {
             <button className="cart-btn" onClick={() => setCartOpen(true)}>
               <CartIcon size={18}/>
               Panier
-              {total > 0 && <span className="cart-count">{total}</span>}
+              {total > 0 && <span className="cart-count" key={total}>{total}</span>}
             </button>
             <a href={`tel:+221786064030`} className="btn btn-outline">📞 Appeler</a>
             <a href={waLink()} target="_blank" rel="noopener" className="btn btn-gold"><WaIcon/> WhatsApp</a>
@@ -1639,12 +1782,12 @@ function App() {
       {/* CATEGORY + PRODUCTS */}
       <section id="services">
         <div className="cat-section">
-          <div className="section-header">
+          <Reveal className="section-header">
             <p className="section-label">◆ Notre Collection</p>
             <h2 className="section-title">Services & Produits</h2>
             <p className="section-sub">Bijoux en or avec prix indicatifs — variables selon poids, design et finition</p>
-          </div>
-          <div className="ornament">✦</div>
+          </Reveal>
+          <Reveal className="ornament" delay={120} style={{marginBottom:'2.5rem'}}>✦</Reveal>
           <div className="cat-strip">
             {categories.map(c => (
               <button key={c.key} className={`cat-pill${activeFilter===c.key?' active':''}`}
@@ -1662,7 +1805,7 @@ function App() {
             </span>
           </div>
           <div className="products-grid">
-            {filtered.map(p => <ProductCard key={p.id} item={p}/>)}
+            {filtered.map((p, i) => <ProductCard key={p.id} item={p} index={i}/>)}
           </div>
         </div>
       </section>
@@ -1670,8 +1813,8 @@ function App() {
       {/* WHY US */}
       <div className="why-section">
         <div className="why-inner">
-          <h2 className="why-title">Pourquoi choisir Thiam Gold ?</h2>
-          <p className="why-sub">Une bijouterie de confiance au cœur de Dakar</p>
+          <Reveal as="h2" className="why-title">Pourquoi choisir Thiam Gold ?</Reveal>
+          <Reveal as="p" className="why-sub" delay={100}>Une bijouterie de confiance au cœur de Dakar</Reveal>
           <div className="why-grid">
             {[
               {icon:"🏅", title:"Or Certifié", desc:"Bijoux en or authentique 18k, 21k, 22k. Qualité garantie sur chaque pièce."},
@@ -1679,18 +1822,18 @@ function App() {
               {icon:"💬", title:"Contact Direct", desc:"Commandez directement via WhatsApp ou par téléphone, sans intermédiaire."},
               {icon:"📍", title:"À Dakar", desc:"Boutique à Pikine Rue 10, en face Quincaillerie Seck et Frère."},
             ].map((w, i) => (
-              <div className="why-card" key={i}>
+              <Reveal as="div" className="why-card" key={i} delay={i * 100}>
                 <div className="why-icon">{w.icon}</div>
                 <h4>{w.title}</h4>
                 <p>{w.desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </div>
 
       {/* HOURS BAND */}
-      <div className="hours-band">
+      <Reveal as="div" className="hours-band">
         <div className="hours-inner">
           <div className="hours-track">
             {[1,2].map((_,d) => (
@@ -1727,18 +1870,18 @@ function App() {
             ))}
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* CONTACT */}
       <section id="contact" className="contact-section">
-        <div className="section-header" style={{marginBottom:'2rem'}}>
+        <Reveal className="section-header" style={{marginBottom:'2rem'}}>
           <p className="section-label">◆ Nous Trouver</p>
           <h2 className="section-title">Contact & Localisation</h2>
           <p className="section-sub">Commandes, demandes de prix et renseignements — contactez-nous directement.</p>
-        </div>
+        </Reveal>
 
         <div className="contact-grid">
-          <div className="contact-card">
+          <Reveal as="div" className="contact-card">
             <h3>Bijouterie Thiam Gold</h3>
             <p>Pikine Rue 10, en face Quincaillerie Seck et Frère — Dakar / Sénégal</p>
 
@@ -1775,13 +1918,13 @@ function App() {
                 title="Bijouterie Thiam Gold — Pikine Rue 10, Dakar"
               />
             </div>
-          </div>
+          </Reveal>
 
-          <div className="contact-card">
+          <Reveal as="div" className="contact-card" delay={120}>
             <h3>Envoyer un message</h3>
             <p>Remplissez le formulaire — il sera envoyé directement sur WhatsApp.</p>
             <ContactForm/>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -1795,6 +1938,8 @@ function App() {
 
       {/* CART DRAWER */}
       {cartOpen && <CartDrawer onClose={() => setCartOpen(false)}/>}
+
+      <FloatingWhatsApp/>
     </>
   );
 }
